@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Pagos - Club de Fútbol</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+        h1 { color: #004080; }
+        form { background: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 0 5px #ccc; margin-bottom: 20px; }
+        label { display: block; margin-top: 10px; }
+        input, select { width: 100%; padding: 8px; margin-top: 5px; }
+        button { margin-top: 15px; padding: 10px 15px; background-color: #004080; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #003366; }
+        table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 0 5px #ccc; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #004080; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Registro de Pagos</h1>
+    <form id="pagoForm">
+        <label for="nombre">Nombre del Jugador:</label>
+        <input type="text" id="nombre" required>
+
+        <label for="monto">Monto (en $):</label>
+        <input type="number" id="monto" required>
+
+        <label for="fecha">Fecha del Pago:</label>
+        <input type="date" id="fecha" required>
+
+        <label for="concepto">Concepto:</label>
+        <input type="text" id="concepto" required>
+
+        <button type="submit">Registrar Pago</button>
+    </form>
+
+    <h2>Pagos Registrados</h2>
+    <table id="tablaPagos">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Monto</th>
+                <th>Fecha</th>
+                <th>Concepto</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        const form = document.getElementById('pagoForm');
+        const tabla = document.getElementById('tablaPagos').getElementsByTagName('tbody')[0];
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const nombre = document.getElementById('nombre').value;
+            const monto = document.getElementById('monto').value;
+            const fecha = document.getElementById('fecha').value;
+            const concepto = document.getElementById('concepto').value;
+
+            const fila = tabla.insertRow();
+            fila.insertCell(0).textContent = nombre;
+            fila.insertCell(1).textContent = `$${parseFloat(monto).toFixed(2)}`;
+            fila.insertCell(2).textContent = fecha;
+            fila.insertCell(3).textContent = concepto;
+
+            form.reset();
+        });
+    </script>
+</body>
+</html>
