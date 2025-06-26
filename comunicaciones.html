@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Comunicaciones - Club de Fútbol</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f9f9f9; }
+        h1 { color: #004080; }
+        form { background: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 0 5px #ccc; margin-bottom: 20px; }
+        input[type="text"], textarea {
+            width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box;
+            border: 1px solid #ccc; border-radius: 4px;
+        }
+        button {
+            background-color: #004080; color: white; padding: 10px 20px;
+            border: none; border-radius: 4px; cursor: pointer;
+        }
+        button:hover { background-color: #003366; }
+        .mensaje {
+            background: #fff; padding: 10px; margin-bottom: 10px;
+            border-left: 4px solid #004080; box-shadow: 0 0 3px #ccc;
+        }
+        .mensaje h3 { margin: 0 0 5px 0; color: #004080; }
+    </style>
+</head>
+<body>
+    <h1>Comunicaciones del Club</h1>
+    <form id="formulario">
+        <label for="titulo">Título del mensaje:</label>
+        <input type="text" id="titulo" required>
+        <label for="contenido">Contenido:</label>
+        <textarea id="contenido" rows="4" required></textarea>
+        <button type="submit">Publicar mensaje</button>
+    </form>
+
+    <div id="mensajes">
+        <!-- Mensajes publicados aparecerán aquí -->
+    </div>
+
+    <script>
+        const formulario = document.getElementById('formulario');
+        const mensajesDiv = document.getElementById('mensajes');
+
+        formulario.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const titulo = document.getElementById('titulo').value.trim();
+            const contenido = document.getElementById('contenido').value.trim();
+
+            if (titulo && contenido) {
+                const mensaje = document.createElement('div');
+                mensaje.className = 'mensaje';
+                mensaje.innerHTML = `<h3>${titulo}</h3><p>${contenido}</p>`;
+                mensajesDiv.prepend(mensaje);
+
+                formulario.reset();
+            }
+        });
+    </script>
+</body>
+</html>
