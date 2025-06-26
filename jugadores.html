@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Jugadores</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #004080; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f0f0f0; }
+        form { margin-top: 20px; }
+        label { display: block; margin-top: 10px; }
+        input[type="text"], input[type="number"] {
+            width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;
+        }
+        button { margin-top: 15px; padding: 10px 15px; background-color: #004080; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #003366; }
+    </style>
+</head>
+<body>
+    <h1>Gestión de Jugadores</h1>
+
+    <form id="formularioJugador">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" required>
+
+        <label for="edad">Edad:</label>
+        <input type="number" id="edad" required>
+
+        <label for="posicion">Posición:</label>
+        <input type="text" id="posicion" required>
+
+        <label for="equipo">Equipo:</label>
+        <input type="text" id="equipo" required>
+
+        <button type="submit">Agregar Jugador</button>
+    </form>
+
+    <table id="tablaJugadores">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Posición</th>
+                <th>Equipo</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        const formulario = document.getElementById('formularioJugador');
+        const tabla = document.getElementById('tablaJugadores').getElementsByTagName('tbody')[0];
+
+        formulario.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const nombre = document.getElementById('nombre').value;
+            const edad = document.getElementById('edad').value;
+            const posicion = document.getElementById('posicion').value;
+            const equipo = document.getElementById('equipo').value;
+
+            const fila = tabla.insertRow();
+            fila.insertCell(0).textContent = nombre;
+            fila.insertCell(1).textContent = edad;
+            fila.insertCell(2).textContent = posicion;
+            fila.insertCell(3).textContent = equipo;
+
+            formulario.reset();
+        });
+    </script>
+</body>
+</html>
