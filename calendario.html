@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendario del Club</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        header { background-color: #004080; color: white; padding: 20px; text-align: center; }
+        nav { background-color: #003366; padding: 10px; }
+        nav a { color: white; margin: 0 15px; text-decoration: none; font-weight: bold; }
+        nav a:hover { text-decoration: underline; }
+        main { padding: 20px; }
+        section { margin-bottom: 30px; }
+        h2 { color: #004080; }
+        form input, form textarea, form button {
+            display: block; margin: 10px 0; padding: 8px; width: 100%; max-width: 400px;
+        }
+        ul { list-style-type: none; padding-left: 0; }
+        li { background: #f0f0f0; margin: 5px 0; padding: 10px; border-left: 5px solid #004080; }
+        footer { background-color: #f0f0f0; text-align: center; padding: 10px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Calendario del Club de Fútbol</h1>
+    </header>
+    <nav>
+        <a href="index.html">Inicio</a>
+        <a href="jugadores.html">Jugadores</a>
+        <a href="calendario.html">Calendario</a>
+        <a href="pagos.html">Pagos</a>
+        <a href="comunicaciones.html">Comunicaciones</a>
+        <a href="contacto.html">Contacto</a>
+    </nav>
+    <main>
+        <section>
+            <h2>Agregar Evento</h2>
+            <form id="eventoForm">
+                <label for="fecha">Fecha:</label>
+                <input type="date" id="fecha" required>
+                <label for="hora">Hora:</label>
+                <input type="time" id="hora" required>
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" rows="3" required></textarea>
+                <button type="submit">Agregar Evento</button>
+            </form>
+        </section>
+        <section>
+            <h2>Eventos Programados</h2>
+            <ul id="listaEventos"></ul>
+        </section>
+    </main>
+    <footer>
+        &copy; 2024 Club de Fútbol - Calendario
+    </footer>
+    <script>
+        const form = document.getElementById('eventoForm');
+        const lista = document.getElementById('listaEventos');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fecha = document.getElementById('fecha').value;
+            const hora = document.getElementById('hora').value;
+            const descripcion = document.getElementById('descripcion').value;
+
+            const item = document.createElement('li');
+            item.textContent = `${fecha} ${hora} - ${descripcion}`;
+            lista.appendChild(item);
+
+            form.reset();
+        });
+    </script>
+</body>
+</html>
