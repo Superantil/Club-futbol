@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Contacto - Club de Fútbol</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        header { background-color: #004080; color: white; padding: 20px; text-align: center; }
+        main { padding: 20px; max-width: 600px; margin: auto; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        button { margin-top: 15px; padding: 10px 20px; background-color: #004080; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #003366; }
+        .resultado { margin-top: 20px; background-color: #f0f0f0; padding: 15px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Contacto</h1>
+        <p>Envíanos tus dudas o comentarios</p>
+    </header>
+    <main>
+        <form id="formularioContacto">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" required>
+
+            <label for="correo">Correo electrónico:</label>
+            <input type="email" id="correo" name="correo" required>
+
+            <label for="asunto">Asunto:</label>
+            <input type="text" id="asunto" name="asunto" required>
+
+            <label for="mensaje">Mensaje:</label>
+            <textarea id="mensaje" name="mensaje" rows="5" required></textarea>
+
+            <button type="submit">Enviar</button>
+        </form>
+
+        <div class="resultado" id="resultado" style="display:none;"></div>
+    </main>
+
+    <script>
+        document.getElementById('formularioContacto').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const nombre = document.getElementById('nombre').value;
+            const correo = document.getElementById('correo').value;
+            const asunto = document.getElementById('asunto').value;
+            const mensaje = document.getElementById('mensaje').value;
+
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = `
+                <h3>Datos enviados:</h3>
+                <p><strong>Nombre:</strong> ${nombre}</p>
+                <p><strong>Correo:</strong> ${correo}</p>
+                <p><strong>Asunto:</strong> ${asunto}</p>
+                <p><strong>Mensaje:</strong> ${mensaje}</p>
+            `;
+            resultado.style.display = 'block';
+            this.reset();
+        });
+    </script>
+</body>
+</html>
