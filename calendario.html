@@ -3,74 +3,99 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Calendario del Club</title>
+    <title>Calendario de Eventos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f6f8; }
         header { background-color: #004080; color: white; padding: 20px; text-align: center; }
-        nav { background-color: #003366; padding: 10px; }
-        nav a { color: white; margin: 0 15px; text-decoration: none; font-weight: bold; }
-        nav a:hover { text-decoration: underline; }
-        main { padding: 20px; }
-        section { margin-bottom: 30px; }
+        main { padding: 20px; max-width: 800px; margin: auto; }
         h2 { color: #004080; }
-        form input, form textarea, form button {
-            display: block; margin: 10px 0; padding: 8px; width: 100%; max-width: 400px;
-        }
-        ul { list-style-type: none; padding-left: 0; }
-        li { background: #f0f0f0; margin: 5px 0; padding: 10px; border-left: 5px solid #004080; }
-        footer { background-color: #f0f0f0; text-align: center; padding: 10px; font-size: 0.9em; }
+        form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; }
+        button { margin-top: 15px; padding: 10px 20px; background-color: #004080; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #003366; }
+        .evento { background: white; padding: 15px; margin-bottom: 10px; border-left: 5px solid #004080; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .evento small { color: #555; }
+        .evento button { float: right; background-color: #c62828; margin-top: 0; }
+        .evento button:hover { background-color: #b71c1c; }
     </style>
 </head>
 <body>
     <header>
-        <h1>Calendario del Club de Fútbol</h1>
+        <h1>Calendario de Eventos</h1>
     </header>
-    <nav>
-        <a href="index.html">Inicio</a>
-        <a href="jugadores.html">Jugadores</a>
-        <a href="calendario.html">Calendario</a>
-        <a href="pagos.html">Pagos</a>
-        <a href="comunicaciones.html">Comunicaciones</a>
-        <a href="contacto.html">Contacto</a>
-    </nav>
     <main>
-        <section>
-            <h2>Agregar Evento</h2>
-            <form id="eventoForm">
-                <label for="fecha">Fecha:</label>
-                <input type="date" id="fecha" required>
-                <label for="hora">Hora:</label>
-                <input type="time" id="hora" required>
-                <label for="descripcion">Descripción:</label>
-                <textarea id="descripcion" rows="3" required></textarea>
-                <button type="submit">Agregar Evento</button>
-            </form>
-        </section>
-        <section>
-            <h2>Eventos Programados</h2>
-            <ul id="listaEventos"></ul>
-        </section>
+        <h2>Agregar Evento</h2>
+        <form id="eventoForm">
+            <label for="fecha">Fecha</label>
+            <input type="date" id="fecha" required>
+            <label for="hora">Hora</label>
+            <input type="time" id="hora" required>
+            <label for="descripcion">Descripción</label>
+            <textarea id="descripcion" rows="3" required></textarea>
+            <button type="submit">Agregar Evento</button>
+        </form>
+
+        <h2>Próximos Eventos</h2>
+        <div id="listaEventos"></div>
     </main>
-    <footer>
-        &copy; 2024 Club de Fútbol - Calendario
-    </footer>
-    <script>
-        const form = document.getElementById('eventoForm');
-        const lista = document.getElementById('listaEventos');
 
-        form.addEventListener('submit', function(e) {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAaamjQ69jxcujSqRyqvXMmP2XekrpJbKo",
+            authDomain: "club-futbol-b834c.firebaseapp.com",
+            projectId: "club-futbol-b834c",
+            storageBucket: "club-futbol-b834c.firebasestorage.app",
+            messagingSenderId: "837380107385",
+            appId: "1:837380107385:web:f418b5d581d64fe377b8a8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const eventosRef = collection(db, "eventos");
+
+        const eventoForm = document.getElementById("eventoForm");
+        const listaEventos = document.getElementById("listaEventos");
+
+        eventoForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const fecha = document.getElementById('fecha').value;
-            const hora = document.getElementById('hora').value;
-            const descripcion = document.getElementById('descripcion').value;
+            const fecha = document.getElementById("fecha").value;
+            const hora = document.getElementById("hora").value;
+            const descripcion = document.getElementById("descripcion").value;
 
-            const item = document.createElement('li');
-            item.textContent = `${fecha} ${hora} - ${descripcion}`;
-            lista.appendChild(item);
-
-            form.reset();
+            if (fecha && hora && descripcion) {
+                await addDoc(eventosRef, {
+                    fecha,
+                    hora,
+                    descripcion
+                });
+                eventoForm.reset();
+            }
         });
+
+        const q = query(eventosRef, orderBy("fecha"));
+        onSnapshot(q, (snapshot) => {
+            listaEventos.innerHTML = "";
+            snapshot.forEach((docSnap) => {
+                const evento = docSnap.data();
+                const div = document.createElement("div");
+                div.className = "evento";
+                div.innerHTML = `
+                    <strong>${evento.descripcion}</strong><br>
+                    <small>${evento.fecha} ${evento.hora}</small>
+                    <button onclick="eliminarEvento('${docSnap.id}')">Eliminar</button>
+                `;
+                listaEventos.appendChild(div);
+            });
+        });
+
+        window.eliminarEvento = async (id) => {
+            await deleteDoc(doc(db, "eventos", id));
+        };
     </script>
 </body>
 </html>
