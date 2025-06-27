@@ -6,69 +6,105 @@
     <title>Gestión de Pagos - Club de Fútbol</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
-        h1 { color: #004080; }
-        form { background: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 0 5px #ccc; margin-bottom: 20px; }
-        label { display: block; margin-top: 10px; }
-        input, select { width: 100%; padding: 8px; margin-top: 5px; }
-        button { margin-top: 15px; padding: 10px 15px; background-color: #004080; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background-color: #f4f6f8; }
+        header { background-color: #004080; color: white; padding: 20px; text-align: center; }
+        main { padding: 20px; max-width: 800px; margin: auto; }
+        h2 { color: #004080; }
+        form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        input, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #004080; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background-color: #003366; }
-        table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 0 5px #ccc; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-        th { background-color: #004080; color: white; }
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #e0e0e0; }
+        .delete-btn { background-color: #c62828; }
+        .delete-btn:hover { background-color: #b71c1c; }
     </style>
 </head>
 <body>
-    <h1>Registro de Pagos</h1>
-    <form id="pagoForm">
-        <label for="nombre">Nombre del Jugador:</label>
-        <input type="text" id="nombre" required>
+    <header>
+        <h1>Gestión de Pagos</h1>
+    </header>
+    <main>
+        <h2>Registrar Pago</h2>
+        <form id="pagoForm">
+            <input type="text" id="nombre" placeholder="Nombre del jugador" required>
+            <input type="number" id="monto" placeholder="Monto" required>
+            <input type="date" id="fecha" required>
+            <input type="text" id="concepto" placeholder="Concepto" required>
+            <button type="submit">Agregar Pago</button>
+        </form>
 
-        <label for="monto">Monto (en $):</label>
-        <input type="number" id="monto" required>
+        <h2>Pagos Registrados</h2>
+        <table id="tablaPagos">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Monto</th>
+                    <th>Fecha</th>
+                    <th>Concepto</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </main>
 
-        <label for="fecha">Fecha del Pago:</label>
-        <input type="date" id="fecha" required>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
-        <label for="concepto">Concepto:</label>
-        <input type="text" id="concepto" required>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAaamjQ69jxcujSqRyqvXMmP2XekrpJbKo",
+            authDomain: "club-futbol-b834c.firebaseapp.com",
+            projectId: "club-futbol-b834c",
+            storageBucket: "club-futbol-b834c.firebasestorage.app",
+            messagingSenderId: "837380107385",
+            appId: "1:837380107385:web:f418b5d581d64fe377b8a8"
+        };
 
-        <button type="submit">Registrar Pago</button>
-    </form>
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const pagosRef = collection(db, "pagos");
 
-    <h2>Pagos Registrados</h2>
-    <table id="tablaPagos">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Monto</th>
-                <th>Fecha</th>
-                <th>Concepto</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+        const pagoForm = document.getElementById("pagoForm");
+        const tablaPagos = document.querySelector("#tablaPagos tbody");
 
-    <script>
-        const form = document.getElementById('pagoForm');
-        const tabla = document.getElementById('tablaPagos').getElementsByTagName('tbody')[0];
+        pagoForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById("nombre").value;
+            const monto = parseFloat(document.getElementById("monto").value);
+            const fecha = document.getElementById("fecha").value;
+            const concepto = document.getElementById("concepto").value;
 
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
+            if (nombre && monto && fecha && concepto) {
+                await addDoc(pagosRef, { nombre, monto, fecha, concepto });
+                pagoForm.reset();
+            }
+        });
 
-            const nombre = document.getElementById('nombre').value;
-            const monto = document.getElementById('monto').value;
-            const fecha = document.getElementById('fecha').value;
-            const concepto = document.getElementById('concepto').value;
+        const q = query(pagosRef, orderBy("fecha", "desc"));
+        onSnapshot(q, (snapshot) => {
+            tablaPagos.innerHTML = "";
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${data.nombre}</td>
+                    <td>$${data.monto.toFixed(2)}</td>
+                    <td>${data.fecha}</td>
+                    <td>${data.concepto}</td>
+                    <td><button class="delete-btn" data-id="${docSnap.id}">Eliminar</button></td>
+                `;
+                tablaPagos.appendChild(row);
+            });
 
-            const fila = tabla.insertRow();
-            fila.insertCell(0).textContent = nombre;
-            fila.insertCell(1).textContent = `$${parseFloat(monto).toFixed(2)}`;
-            fila.insertCell(2).textContent = fecha;
-            fila.insertCell(3).textContent = concepto;
-
-            form.reset();
+            document.querySelectorAll(".delete-btn").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    const id = btn.getAttribute("data-id");
+                    await deleteDoc(doc(db, "pagos", id));
+                });
+            });
         });
     </script>
 </body>
