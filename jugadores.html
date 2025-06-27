@@ -1,98 +1,173 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Gestión de Jugadores</title>
-    <script type="module">
-        // Importar Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
-
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyAaamjQ69jxcujSqRyqvXMmP2XekrpJbKo",
-            authDomain: "club-futbol-b834c.firebaseapp.com",
-            projectId: "club-futbol-b834c",
-            storageBucket: "club-futbol-b834c.firebasestorage.app",
-            messagingSenderId: "837380107385",
-            appId: "1:837380107385:web:f418b5d581d64fe377b8a8"
-        };
-
-        // Inicializar Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // Función para agregar jugador
-        document.addEventListener("DOMContentLoaded", () => {
-            const form = document.getElementById("formJugador");
-            const tabla = document.getElementById("tablaJugadores");
-
-            async function cargarJugadores() {
-                tabla.innerHTML = "";
-                const querySnapshot = await getDocs(collection(db, "jugadores"));
-                querySnapshot.forEach((docSnap) => {
-                    const jugador = docSnap.data();
-                    const fila = document.createElement("tr");
-                    fila.innerHTML = `
-                        <td>${jugador.nombre}</td>
-                        <td>${jugador.edad}</td>
-                        <td>${jugador.posicion}</td>
-                        <td>${jugador.equipo}</td>
-                        <td><button data-id="${docSnap.id}" class="eliminar">Eliminar</button></td>
-                    `;
-                    tabla.appendChild(fila);
-                });
-            }
-
-            form.addEventListener("submit", async (e) => {
-                e.preventDefault();
-                const nombre = form.nombre.value;
-                const edad = form.edad.value;
-                const posicion = form.posicion.value;
-                const equipo = form.equipo.value;
-
-                await addDoc(collection(db, "jugadores"), {
-                    nombre, edad, posicion, equipo
-                });
-
-                form.reset();
-                cargarJugadores();
-            });
-
-            tabla.addEventListener("click", async (e) => {
-                if (e.target.classList.contains("eliminar")) {
-                    const id = e.target.getAttribute("data-id");
-                    await deleteDoc(doc(db, "jugadores", id));
-                    cargarJugadores();
-                }
-            });
-
-            cargarJugadores();
-        });
-    </script>
+  <meta charset="UTF-8" />
+  <title>Gestión de Jugadores</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f6f8;
+    }
+    h1 {
+      text-align: center;
+      color: #004080;
+    }
+    .form-container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 500px;
+      margin: 0 auto 30px auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .form-container input, .form-container select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .form-container button {
+      background-color: #004080;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .form-container button:hover {
+      background-color: #003366;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #004080;
+      color: white;
+    }
+    .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .delete-btn:hover {
+      background-color: #c0392b;
+    }
+  </style>
 </head>
 <body>
-    <h1>Gestión de Jugadores</h1>
-    <form id="formJugador">
-        <input type="text" name="nombre" placeholder="Nombre" required>
-        <input type="number" name="edad" placeholder="Edad" required>
-        <input type="text" name="posicion" placeholder="Posición" required>
-        <input type="text" name="equipo" placeholder="Equipo" required>
-        <button type="submit">Agregar Jugador</button>
-    </form>
-    <h2>Lista de Jugadores</h2>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Edad</th>
-                <th>Posición</th>
-                <th>Equipo</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-        <tbody id="tablaJugadores"></tbody>
-    </table>
+  <h1>Gestión de Jugadores</h1>
+  <div class="form-container">
+    <input type="text" id="nombre" placeholder="Nombre del jugador" required />
+    <input type="number" id="edad" placeholder="Edad" required />
+    <input type="text" id="posicion" placeholder="Posición" required />
+    <input type="text" id="equipo" placeholder="Equipo" required />
+    <button onclick="agregarJugador()">Agregar Jugador</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Edad</th>
+        <th>Posición</th>
+        <th>Equipo</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tabla-jugadores">
+    </tbody>
+  </table>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAaamjQ69jxcujSqRyqvXMmP2XekrpJbKo",
+      authDomain: "club-futbol-b834c.firebaseapp.com",
+      projectId: "club-futbol-b834c",
+      storageBucket: "club-futbol-b834c.firebasestorage.app",
+      messagingSenderId: "837380107385",
+      appId: "1:837380107385:web:f418b5d581d64fe377b8a8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const jugadoresRef = collection(db, "jugadores");
+
+    async function agregarJugador() {
+      const nombre = document.getElementById("nombre").value;
+      const edad = document.getElementById("edad").value;
+      const posicion = document.getElementById("posicion").value;
+      const equipo = document.getElementById("equipo").value;
+
+      if (nombre && edad && posicion && equipo) {
+        await addDoc(jugadoresRef, {
+          nombre,
+          edad,
+          posicion,
+          equipo
+        });
+
+        document.getElementById("nombre").value = "";
+        document.getElementById("edad").value = "";
+        document.getElementById("posicion").value = "";
+        document.getElementById("equipo").value = "";
+      }
+    }
+
+    function renderJugador(docData, id) {
+      const tabla = document.getElementById("tabla-jugadores");
+      const fila = document.createElement("tr");
+
+      fila.innerHTML = `
+        <td>${docData.nombre}</td>
+        <td>${docData.edad}</td>
+        <td>${docData.posicion}</td>
+        <td>${docData.equipo}</td>
+        <td><button class="delete-btn" onclick="eliminarJugador('${id}')">Eliminar</button></td>
+      `;
+
+      tabla.appendChild(fila);
+    }
+
+    function limpiarTabla() {
+      document.getElementById("tabla-jugadores").innerHTML = "";
+    }
+
+    async function eliminarJugador(id) {
+      await deleteDoc(doc(db, "jugadores", id));
+    }
+
+    // Cargar jugadores en tiempo real
+    onSnapshot(jugadoresRef, (snapshot) => {
+      limpiarTabla();
+      snapshot.forEach((doc) => {
+        renderJugador(doc.data(), doc.id);
+      });
+    });
+
+    // Hacer la función eliminarJugador accesible globalmente
+    window.eliminarJugador = eliminarJugador;
+  </script>
 </body>
 </html>
