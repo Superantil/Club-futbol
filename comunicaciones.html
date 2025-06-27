@@ -6,57 +6,91 @@
     <title>Comunicaciones - Club de Fútbol</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f9f9f9; }
-        h1 { color: #004080; }
-        form { background: #fff; padding: 15px; border-radius: 5px; box-shadow: 0 0 5px #ccc; margin-bottom: 20px; }
-        input[type="text"], textarea {
-            width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box;
-            border: 1px solid #ccc; border-radius: 4px;
-        }
-        button {
-            background-color: #004080; color: white; padding: 10px 20px;
-            border: none; border-radius: 4px; cursor: pointer;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f6f8; }
+        header { background-color: #004080; color: white; padding: 20px; text-align: center; }
+        main { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { color: #004080; }
+        form { margin-bottom: 30px; }
+        input, textarea { width: 100%; padding: 10px; margin-top: 8px; margin-bottom: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #004080; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background-color: #003366; }
-        .mensaje {
-            background: #fff; padding: 10px; margin-bottom: 10px;
-            border-left: 4px solid #004080; box-shadow: 0 0 3px #ccc;
-        }
-        .mensaje h3 { margin: 0 0 5px 0; color: #004080; }
+        .mensaje { background: #e9f1ff; padding: 15px; border-left: 5px solid #004080; margin-bottom: 15px; border-radius: 4px; }
+        .mensaje h3 { margin: 0 0 5px 0; }
+        .mensaje small { color: #555; }
+        .mensaje button { float: right; background-color: #c62828; margin-top: -30px; }
     </style>
 </head>
 <body>
-    <h1>Comunicaciones del Club</h1>
-    <form id="formulario">
-        <label for="titulo">Título del mensaje:</label>
-        <input type="text" id="titulo" required>
-        <label for="contenido">Contenido:</label>
-        <textarea id="contenido" rows="4" required></textarea>
-        <button type="submit">Publicar mensaje</button>
-    </form>
+    <header>
+        <h1>Comunicaciones del Club</h1>
+    </header>
+    <main>
+        <h2>Publicar nuevo mensaje</h2>
+        <form id="formulario">
+            <label for="titulo">Título:</label>
+            <input type="text" id="titulo" required>
+            <label for="contenido">Contenido:</label>
+            <textarea id="contenido" rows="4" required></textarea>
+            <button type="submit">Publicar</button>
+        </form>
+        <h2>Mensajes publicados</h2>
+        <div id="mensajes"></div>
+    </main>
 
-    <div id="mensajes">
-        <!-- Mensajes publicados aparecerán aquí -->
-    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
-    <script>
-        const formulario = document.getElementById('formulario');
-        const mensajesDiv = document.getElementById('mensajes');
+        const firebaseConfig = {
+            apiKey: "AIzaSyAaamjQ69jxcujSqRyqvXMmP2XekrpJbKo",
+            authDomain: "club-futbol-b834c.firebaseapp.com",
+            projectId: "club-futbol-b834c",
+            storageBucket: "club-futbol-b834c.firebasestorage.app",
+            messagingSenderId: "837380107385",
+            appId: "1:837380107385:web:f418b5d581d64fe377b8a8"
+        };
 
-        formulario.addEventListener('submit', function(event) {
-            event.preventDefault();
-            const titulo = document.getElementById('titulo').value.trim();
-            const contenido = document.getElementById('contenido').value.trim();
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const mensajesRef = collection(db, "comunicaciones");
 
+        const formulario = document.getElementById("formulario");
+        const mensajesDiv = document.getElementById("mensajes");
+
+        formulario.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const titulo = document.getElementById("titulo").value.trim();
+            const contenido = document.getElementById("contenido").value.trim();
             if (titulo && contenido) {
-                const mensaje = document.createElement('div');
-                mensaje.className = 'mensaje';
-                mensaje.innerHTML = `<h3>${titulo}</h3><p>${contenido}</p>`;
-                mensajesDiv.prepend(mensaje);
-
+                await addDoc(mensajesRef, {
+                    titulo,
+                    contenido,
+                    fecha: new Date()
+                });
                 formulario.reset();
             }
         });
+
+        const q = query(mensajesRef, orderBy("fecha", "desc"));
+        onSnapshot(q, (snapshot) => {
+            mensajesDiv.innerHTML = "";
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const div = document.createElement("div");
+                div.className = "mensaje";
+                div.innerHTML = `
+                    <h3>${data.titulo}</h3>
+                    <p>${data.contenido}</p>
+                    <small>${new Date(data.fecha.seconds * 1000).toLocaleString()}</small>
+                    <button onclick="eliminarMensaje('${docSnap.id}')">Eliminar</button>
+                `;
+                mensajesDiv.appendChild(div);
+            });
+        });
+
+        window.eliminarMensaje = async (id) => {
+            await deleteDoc(doc(db, "comunicaciones", id));
+        };
     </script>
 </body>
 </html>
