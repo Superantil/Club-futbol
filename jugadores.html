@@ -1,173 +1,122 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Gestión de Jugadores</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f4f6f8;
-    }
-    h1 {
-      text-align: center;
-      color: #004080;
-    }
-    .form-container {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      max-width: 500px;
-      margin: 0 auto 30px auto;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .form-container input, .form-container select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .form-container button {
-      background-color: #004080;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .form-container button:hover {
-      background-color: #003366;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    th, td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-    th {
-      background-color: #004080;
-      color: white;
-    }
-    .delete-btn {
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .delete-btn:hover {
-      background-color: #c0392b;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Gestión de Jugadores</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: 'Roboto', sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
+        h1 { text-align: center; color: #004080; }
+        form { max-width: 500px; margin: 0 auto 30px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        input, select, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 4px; border: 1px solid #ccc; }
+        button { background-color: #004080; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #003366; }
+        table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #004080; color: white; }
+        .delete-btn { background-color: #c0392b; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
+        .delete-btn:hover { background-color: #a93226; }
+        .message { text-align: center; margin-top: 10px; font-weight: bold; }
+    </style>
 </head>
 <body>
-  <h1>Gestión de Jugadores</h1>
-  <div class="form-container">
-    <input type="text" id="nombre" placeholder="Nombre del jugador" required />
-    <input type="number" id="edad" placeholder="Edad" required />
-    <input type="text" id="posicion" placeholder="Posición" required />
-    <input type="text" id="equipo" placeholder="Equipo" required />
-    <button onclick="agregarJugador()">Agregar Jugador</button>
-  </div>
+    <h1>Gestión de Jugadores</h1>
+    <form id="playerForm">
+        <input type="text" id="nombre" placeholder="Nombre del jugador" required>
+        <input type="number" id="edad" placeholder="Edad" required>
+        <input type="text" id="posicion" placeholder="Posición" required>
+        <input type="text" id="equipo" placeholder="Equipo" required>
+        <button type="submit">Agregar Jugador</button>
+        <div class="message" id="message"></div>
+    </form>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Edad</th>
-        <th>Posición</th>
-        <th>Equipo</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody id="tabla-jugadores">
-    </tbody>
-  </table>
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Posición</th>
+                <th>Equipo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="playersTableBody"></tbody>
+    </table>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAaamjQ69jxcujSqRyqvXMmP2XekrpJbKo",
-      authDomain: "club-futbol-b834c.firebaseapp.com",
-      projectId: "club-futbol-b834c",
-      storageBucket: "club-futbol-b834c.firebasestorage.app",
-      messagingSenderId: "837380107385",
-      appId: "1:837380107385:web:f418b5d581d64fe377b8a8"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAaamjQ69jxcujSqRyqvXMmP2XekrpJbKo",
+            authDomain: "club-futbol-b834c.firebaseapp.com",
+            projectId: "club-futbol-b834c",
+            storageBucket: "club-futbol-b834c.firebasestorage.app",
+            messagingSenderId: "837380107385",
+            appId: "1:837380107385:web:f418b5d581d64fe377b8a8"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const jugadoresRef = collection(db, "jugadores");
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const playersCollection = collection(db, "jugadores");
 
-    async function agregarJugador() {
-      const nombre = document.getElementById("nombre").value;
-      const edad = document.getElementById("edad").value;
-      const posicion = document.getElementById("posicion").value;
-      const equipo = document.getElementById("equipo").value;
+        const form = document.getElementById("playerForm");
+        const message = document.getElementById("message");
+        const tableBody = document.getElementById("playersTableBody");
 
-      if (nombre && edad && posicion && equipo) {
-        await addDoc(jugadoresRef, {
-          nombre,
-          edad,
-          posicion,
-          equipo
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById("nombre").value.trim();
+            const edad = parseInt(document.getElementById("edad").value);
+            const posicion = document.getElementById("posicion").value.trim();
+            const equipo = document.getElementById("equipo").value.trim();
+
+            if (!nombre || !edad || !posicion || !equipo) {
+                message.textContent = "Por favor completa todos los campos.";
+                message.style.color = "red";
+                return;
+            }
+
+            try {
+                await addDoc(playersCollection, { nombre, edad, posicion, equipo });
+                message.textContent = "Jugador agregado correctamente.";
+                message.style.color = "green";
+                form.reset();
+            } catch (error) {
+                console.error("Error al agregar jugador:", error);
+                message.textContent = "Error al agregar jugador.";
+                message.style.color = "red";
+            }
         });
 
-        document.getElementById("nombre").value = "";
-        document.getElementById("edad").value = "";
-        document.getElementById("posicion").value = "";
-        document.getElementById("equipo").value = "";
-      }
-    }
+        function renderPlayer(doc) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${doc.data().nombre}</td>
+                <td>${doc.data().edad}</td>
+                <td>${doc.data().posicion}</td>
+                <td>${doc.data().equipo}</td>
+                <td><button class="delete-btn" data-id="${doc.id}">Eliminar</button></td>
+            `;
+            tableBody.appendChild(tr);
+        }
 
-    function renderJugador(docData, id) {
-      const tabla = document.getElementById("tabla-jugadores");
-      const fila = document.createElement("tr");
+        onSnapshot(playersCollection, (snapshot) => {
+            tableBody.innerHTML = "";
+            snapshot.forEach(doc => renderPlayer(doc));
+        });
 
-      fila.innerHTML = `
-        <td>${docData.nombre}</td>
-        <td>${docData.edad}</td>
-        <td>${docData.posicion}</td>
-        <td>${docData.equipo}</td>
-        <td><button class="delete-btn" onclick="eliminarJugador('${id}')">Eliminar</button></td>
-      `;
-
-      tabla.appendChild(fila);
-    }
-
-    function limpiarTabla() {
-      document.getElementById("tabla-jugadores").innerHTML = "";
-    }
-
-    async function eliminarJugador(id) {
-      await deleteDoc(doc(db, "jugadores", id));
-    }
-
-    // Cargar jugadores en tiempo real
-    onSnapshot(jugadoresRef, (snapshot) => {
-      limpiarTabla();
-      snapshot.forEach((doc) => {
-        renderJugador(doc.data(), doc.id);
-      });
-    });
-
-    // Hacer la función eliminarJugador accesible globalmente
-    window.eliminarJugador = eliminarJugador;
-  </script>
+        tableBody.addEventListener("click", async (e) => {
+            if (e.target.classList.contains("delete-btn")) {
+                const id = e.target.getAttribute("data-id");
+                try {
+                    await deleteDoc(doc(db, "jugadores", id));
+                } catch (error) {
+                    console.error("Error al eliminar jugador:", error);
+                }
+            }
+        });
+    </script>
 </body>
 </html>
